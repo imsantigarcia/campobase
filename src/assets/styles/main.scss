@@ -1,20 +1,10 @@
-/**
- * Use this file to import partials.
- * Do not include SCSS code in this file.
- */
+// 1. Configuración y Base
+@use 'base/settings';
+@use 'base/base';
 
- /**
- * Import dependencies
- */
-@use "dependencies";
-
-/**
- * Import layouts
- * It's a best practice to use a different partial for each page
- */
-
- @use "layouts/home";
-
-/**
- * Do NOT include anything else in this file!
- */
+// 2. Componentes (Módulos)
+@use 'components/calculator';
+@use 'components/inputs';
+@use 'components/upload';
+@use 'components/results';
+@use 'components/chart';

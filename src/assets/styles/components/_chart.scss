@@ -1,0 +1,21 @@
+.ccs-profile-card {
+    margin-top: 30px;
+    display: none;
+
+    &--visible {
+        display: block;
+        animation: fadeIn 0.8s ease;
+    }
+}
+
+.ccs-profile-chart-container {
+    padding: 20px;
+    height: 300px;
+    width: 100%;
+    position: relative;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}

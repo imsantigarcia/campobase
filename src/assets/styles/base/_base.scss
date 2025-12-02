@@ -1,0 +1,14 @@
+body {
+    font-family: 'Montserrat', 'Segoe UI', Helvetica, Arial, sans-serif;
+    color: var(--text-gray);
+    margin: 0;
+    padding: 20px;
+    min-height: 100vh;
+    
+    /* Fondo complejo */
+    background-image: url('../images/vector-path-bg.webp'), linear-gradient(to bottom, #ffffff, #f0f4f8, #fff8ef, #ffffff);
+    background-repeat: no-repeat, no-repeat;
+    background-position: center top, center;
+    background-size: 100% auto, cover;
+    background-attachment: scroll, fixed;
+}

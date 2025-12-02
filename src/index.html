@@ -1,27 +1,167 @@
 <!DOCTYPE html>
+<html lang="es">
+<head>
+    <!-- 1. METADATOS ESENCIALES Y VIEWPORT -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora de Rutas - Camino con Santiago</title>
+    
+    <!-- 2. FUENTES EXTERNAS (Montserrat) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- 3. LIBRERÍAS CSS / ANIMACIONES (AOS) -->
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    
+    <!-- 4. HOJA DE ESTILOS PRINCIPAL -->
+    <link rel="stylesheet" href="/src/assets/styles/main.scss">
+    
+    <!-- 5. LIBRERÍAS JS SINCRÓNICAS (Chart.js) -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
 
-<html>
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width">
-    <link rel="stylesheet" type="text/css" href="./assets/styles/main.scss"><!-- do not remove this line! -->
-    <title>UOC Boilerplate</title>
-  </head>
-  <body>
-    <div class="uoc-container">
-      <picture>
-        <source srcset="./assets/images/logo.png?as=webp&width=350" type="image/webp" />
-        <img src="./assets/images/logo.png?width=350" alt="Universitat Oberta de Catalunya" class="uoc-logo" />
-      </picture>
-      <h1 class="uoc-title">Hello, UOC!</h1>
-      <p>
-        This is a starter template for the Advanced HTML and CSS Tools courses
-        from the Master's Program in Multimedia Applications and the Master's
-        Program in Web App and Website Development at the Universitat Oberta de
-        Catalunya.
-      </p>
+    <!-- ========================================================= -->
+    <!-- CONTENIDO PRINCIPAL: CALCULADORA CCS -->
+    <!-- ========================================================= -->
+    <div class="ccs-calculator" data-aos="fade-up" data-aos-duration="1000">
+        
+        <!-- ENCABEZADO Y TÍTULO -->
+        <header class="ccs-calculator__header" data-aos="fade-down" data-aos-delay="200">
+            <!-- NOTA: Usar un logo accesible es clave. La ruta debe ser correcta. -->
+            <img src="/src/assets/images/logo.png" alt="Logo Camino con Santiago" class="ccs-calculator__logo">
+            <p class="ccs-calculator__subtitle">Calcula tu próxima salida con el método MIDE y SENDIF</p>
+        </header>
+
+        <!-- SUBIDA DE ARCHIVO GPX (Opcional) -->
+        <div class="ccs-file-upload" data-aos="fade-up" data-aos-delay="250">
+            <input type="file" id="ccsGpxInput" accept=".gpx" class="ccs-file-upload__input">
+            <label for="ccsGpxInput" class="ccs-file-upload__label">
+                <span class="ccs-file-upload__icon">📂</span>
+                <span id="ccsGpxText">Sube tu archivo GPX (opcional)</span>
+            </label>
+            <p class="ccs-file-upload__hint">Calcularemos la distancia y desniveles automáticamente.</p>
+        </div>
+
+        <!-- CONTROLES DE ENTRADA (GRID) -->
+        <div class="ccs-grid">
+            
+            <!-- Entrada 1: Distancia (km) -->
+            <div class="ccs-input-group" data-aos="fade-up" data-aos-delay="300">
+                <label for="ccsDistance" class="ccs-input-group__label">Distancia (km)</label>
+                <div class="ccs-input-group__control">
+                    <input type="range" id="ccsDistRange" min="1" max="50" step="0.5" value="10">
+                    <input type="number" id="ccsDistance" min="1" step="0.1" value="10">
+                </div>
+            </div>
+
+            <!-- Entrada 2: Peso Total (kg) -->
+            <div class="ccs-input-group" data-aos="fade-up" data-aos-delay="400">
+                <label for="ccsWeight" class="ccs-input-group__label">Peso total (peso corporal + mochila)</label>
+                <div class="ccs-input-group__control">
+                    <input type="range" id="ccsWeightRange" min="40" max="130" step="1" value="75">
+                    <input type="number" id="ccsWeight" min="1" value="75">
+                </div>
+            </div>
+
+            <!-- Entrada 3: Desnivel Positivo (m) -->
+            <div class="ccs-input-group" data-aos="fade-up" data-aos-delay="500">
+                <label for="ccsElevation" class="ccs-input-group__label">Desnivel positivo o ascenso (m)</label>
+                <div class="ccs-input-group__control">
+                    <input type="range" id="ccsElevRange" min="0" max="3000" step="50" value="200">
+                    <input type="number" id="ccsElevation" min="0" step="10" value="200">
+                </div>
+            </div>
+
+            <!-- Entrada 4: Desnivel Negativo (m) -->
+            <div class="ccs-input-group" data-aos="fade-up" data-aos-delay="600">
+                <label for="ccsElevationNegative" class="ccs-input-group__label">Desnivel negativo o descenso (m)</label>
+                <div class="ccs-input-group__control">
+                    <input type="range" id="ccsElevNegRange" min="0" max="3000" step="50" value="200">
+                    <input type="number" id="ccsElevationNegative" min="0" step="10" value="200">
+                </div>
+            </div>
+
+            <!-- Entrada 5: Tipo de Terreno (Select) -->
+            <div class="ccs-input-group ccs-grid__full-width" data-aos="fade-up" data-aos-delay="700">
+                <label for="ccsTerrain" class="ccs-input-group__label">Tipo de terreno predominante</label>
+                <div class="ccs-input-group__control">
+                    <!-- Nota: Se añaden IDs a los labels y a los select para accesibilidad -->
+                    <select id="ccsTerrain">
+                        <option value="5">Pista forestal</option>
+                        <option value="4" selected>Camino de montaña o sendero</option>
+                        <option value="3">Sendero complejo</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Entrada 6: Perfil Físico (Select) -->
+            <div class="ccs-input-group ccs-grid__full-width" data-aos="fade-up" data-aos-delay="800">
+                <label for="ccsProfile" class="ccs-input-group__label">Selecciona un perfil físico</label>
+                <div class="ccs-input-group__control">
+                    <select id="ccsProfile">
+                        <option value="beginner">Iniciación (ritmo pausado)</option>
+                        <option value="average" selected>Senderista (ritmo estándar)</option>
+                        <option value="expert">Deportivo (ritmo ágil)</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- SECCIÓN DE RESULTADOS (Salida) -->
+        <div id="ccsResultCard" class="ccs-results" data-aos="zoom-in" data-aos-delay="900" data-aos-offset="10">
+            
+            <div id="resHeader" class="ccs-results__header ccs-results__header--mod">
+                Dificultad física: Moderada
+            </div>
+
+            <!-- Métricas Clave -->
+            <div class="ccs-results__grid">
+                <div class="ccs-results__stat-box">
+                    <span class="ccs-results__value" id="resTotalTimeVal">2h 45m</span>
+                    <span class="ccs-results__label">Tiempo total</span>
+                </div>
+                <div class="ccs-results__stat-box">
+                    <span class="ccs-results__value" id="resCaloriesVal">500</span>
+                    <span class="ccs-results__label">Kcal aprox</span>
+                </div>
+                <div class="ccs-results__stat-box">
+                    <span class="ccs-results__value" id="resSendifScore">180</span>
+                    <span class="ccs-results__label">Puntos SENDIF</span>
+                </div>
+            </div>
+
+            <!-- Narrativa y Descargo de Responsabilidad -->
+            <div class="ccs-results__narrative">
+                <p id="resNarrativeText">Calculando datos...</p>
+                <p class="ccs-results__disclaimer">
+                    ⚠ Recuerda: Estos datos son meramente informativos y basados en modelos teóricos (MIDE/SENDIF). Las actividades en el medio natural son potencialmente peligrosas y dependen de factores cambiantes como el clima.
+                </p>
+            </div>
+        </div>
+
+        <!-- PERFIL DE ELEVACIÓN (Gráfico) -->
+        <div id="ccsProfileCard" class="ccs-results ccs-profile-card" data-aos="fade-up">
+            <div class="ccs-results__header ccs-results__header--mod">
+                Perfil de Elevación
+            </div>
+            <div class="ccs-profile-chart-container">
+                <canvas id="elevationChart"></canvas>
+            </div>
+        </div>
     </div>
-    <include src="./views/footer.html"></include>
-    <script type="module" src="./assets/scripts/main.js"></script><!-- do not remove this line! -->
-  </body>
+
+    <!-- 6. SCRIPTS ASÍNCRONOS (AOS) -->
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    
+    <!-- 7. SCRIPT PRINCIPAL DE LA APLICACIÓN -->
+    <script type="module" src="assets/scripts/main.js"></script>
+
+    <!-- 8. INICIALIZACIÓN DE SCRIPTS -->
+    <script>
+        // Inicialización de la librería de animaciones
+        AOS.init();
+    </script>
+</body>
 </html>

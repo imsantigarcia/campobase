@@ -1,0 +1,56 @@
+.ccs-calculator {
+    background-color: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(8px);
+    max-width: 800px;
+    margin: 20px auto;
+    padding: 40px;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-soft);
+    border: 1px solid rgba(255, 255, 255, 0.8);
+    overflow: hidden;
+
+    // Responsive anidado (Mobile first approach inverso según tu CSS original)
+    @media (max-width: 500px) {
+        padding: 25px;
+    }
+
+    &__header {
+        text-align: center;
+        margin-bottom: 40px;
+    }
+
+    &__logo {
+        max-width: 280px;
+        height: auto;
+        display: block;
+        margin: 0 auto 20px auto;
+
+        @media (max-width: 500px) {
+            max-width: 220px;
+        }
+    }
+
+    &__subtitle {
+        font-size: 1rem;
+        color: var(--text-gray);
+        font-weight: 400;
+        margin: 0;
+    }
+}
+
+// Layout Grid
+.ccs-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 30px;
+
+    @media (min-width: 600px) {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    &__full-width {
+        @media (min-width: 600px) {
+            grid-column: span 2;
+        }
+    }
+}
