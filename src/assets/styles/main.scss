@@ -1,9 +1,9 @@
 // src/assets/styles/main.scss
 
-// 1. VARIABLES GLOBALES (CRÍTICO: El archivo está en la misma carpeta)
+// 1. VARIABLES GLOBALES
 @use 'variables' as *; 
 
-// 2. BASE SETTINGS (CRÍTICO: Ruta corregida a './base/settings')
+// 2. BASE SETTINGS
 @use './base/settings';    
 
 // 3. BASE 
@@ -19,4 +19,3 @@
 @use './components/calculator';
 @use './components/results';    
 @use './components/chart';
-

@@ -1,3 +1,5 @@
+@use '../base/settings' as variables;
+
 .ccs-calculator {
     background-color: rgba(255, 255, 255, 0.95);
     backdrop-filter: blur(8px);
@@ -7,9 +9,9 @@
     border-radius: var(--radius-lg);
     box-shadow: var(--shadow-soft);
     border: 1px solid rgba(255, 255, 255, 0.8);
-    overflow: hidden;
+    overflow: visible; /* FIXED: Was hidden, causing clipping of tooltips/shadows */
 
-    // Responsive anidado (Mobile first approach inverso según tu CSS original)
+    // Responsive anidado
     @media (max-width: 500px) {
         padding: 25px;
     }
@@ -43,14 +45,13 @@
     display: grid;
     grid-template-columns: 1fr;
     gap: 30px;
+    width: 100%; /* Ensure grid takes full width */
 
     @media (min-width: 600px) {
-        grid-template-columns: 1fr 1fr;
+        grid-template-columns: 1fr 1fr; /* Stable 2-column layout */
     }
 
     &__full-width {
-        @media (min-width: 600px) {
-            grid-column: span 2;
-        }
+        grid-column: 1 / -1; /* Robust full width spanning */
     }
 }
