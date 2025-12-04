@@ -1,3 +1,10 @@
+// utils.js
+/**
+ * Módulo de Utilidades
+ * Autor: Campo Base (Asistente CTO)
+ * Responsabilidad: Funciones de uso común (matemáticas, formatos).
+ */
+
 // Formatear horas decimales (ej: 2.5 -> "2h 30m")
 export function formatTime(hours) {
     const h = Math.floor(hours);
@@ -21,4 +28,11 @@ export function getDistanceFromLatLonInKm(lat1, lon1, lat2, lon2) {
 
 function deg2rad(deg) {
     return deg * (Math.PI / 180);
+}
+
+// Para la pista visual de coordenadas en el HTML (usada por safety-planner)
+window.updateCoordHint = function(success, message) {
+    const hintElement = document.getElementById('ccsCoordHint');
+    hintElement.innerHTML = success ? `✅ ${message}` : `❌ ${message}`;
+    hintElement.style.color = success ? '#27ae60' : 'var(--color-danger)';
 }

@@ -1,9 +1,14 @@
+// charts.js
+/**
+ * Módulo de Visualización de Gráficas
+ * Autor: Campo Base (Asistente CTO)
+ * Responsabilidad: Dibujar el perfil de elevación.
+ */
 let chartInstance = null;
 
 export function renderElevationProfile(canvasId, dataPoints) {
     const ctx = document.getElementById(canvasId).getContext('2d');
     
-    // Destruir gráfica anterior si existe
     if (chartInstance) {
         chartInstance.destroy();
     }
@@ -11,13 +16,10 @@ export function renderElevationProfile(canvasId, dataPoints) {
     const labels = dataPoints.map(p => p.x);
     const data = dataPoints.map(p => p.y);
 
-    // Crear gradiente
     const gradient = ctx.createLinearGradient(0, 0, 0, 400);
     gradient.addColorStop(0, 'rgba(59, 139, 250, 0.6)');
     gradient.addColorStop(1, 'rgba(59, 139, 250, 0.0)');
 
-    // Como estamos importando Chart.js vía CDN en el HTML, usamos window.Chart
-    // Si usaras npm install chart.js, aquí harías un import
     chartInstance = new window.Chart(ctx, {
         type: 'line',
         data: {

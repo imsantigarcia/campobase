@@ -1,14 +1,25 @@
+// _base.scss
+
+@use "../variables" as var; // Alias 'var'
+@use 'settings' as variables;
+
 body {
-    font-family: 'Montserrat', 'Segoe UI', Helvetica, Arial, sans-serif;
+    // Usamos Montserrat, pero la definición base de fuente viene de _variables
+    font-family: 'Montserrat', variables.$font-family-sans-serif;
     color: var(--text-gray);
     margin: 0;
     padding: 20px;
     min-height: 100vh;
     
-    /* Fondo complejo */
-    background-image: url('../images/vector-path-bg.webp'), linear-gradient(to bottom, #ffffff, #f0f4f8, #fff8ef, #ffffff);
+    /* Fondo: Aquí iría tu fondo si no lo gestiona _home.scss */
+    /* Lo omitimos si ya lo gestiona _home.scss o si se usará un fondo de imagen */
+
+    /* Ejemplo de fondo (si _home.scss no lo define): */
+    /*
+    background-image: url('vector-path-bg.webp'), linear-gradient(to bottom, #ffffff, #f0f4f8, #fff8ef, #ffffff);
     background-repeat: no-repeat, no-repeat;
     background-position: center top, center;
     background-size: 100% auto, cover;
     background-attachment: scroll, fixed;
+    */
 }

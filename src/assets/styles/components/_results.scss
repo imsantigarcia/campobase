@@ -1,3 +1,5 @@
+@use '../base/settings' as variables;
+
 .ccs-results {
     margin-top: 50px;
     background-color: #fff;
@@ -93,4 +95,100 @@
         margin-top: 20px;
         font-style: italic;
     }
+}
+
+/* --- Logística Temporal (Horarios de Sol) --- */
+.ccs-time-logistics {
+    display: flex;
+    justify-content: space-around;
+    padding: 15px 20px 25px 20px;
+    background-color: #f7f9fc;
+    border-top: 1px solid #f0f0f0;
+    border-bottom: 1px solid #eeeeee;
+}
+.ccs-time-logistics__stat {
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: variables.$text-dark;
+}
+.ccs-time-logistics__icon {
+    font-size: 1.4rem;
+    margin-bottom: 5px;
+}
+.ccs-time-logistics__label {
+    font-size: 0.75rem;
+    color: variables.$text-gray;
+    font-weight: 500;
+    margin-top: 4px;
+}
+.ccs-time-logistics__stat--critical {
+    font-size: 1.3rem;
+    color: variables.$color-danger;
+}
+
+/* --- Clima y Nutrición --- */
+.ccs-weather-logistics {
+    display: flex;
+    justify-content: space-around;
+    padding: 15px 20px 25px 20px;
+    background-color: #fcfcfc; 
+    border-top: 1px solid #eeeeee;
+}
+
+.ccs-weather-logistics__stat {
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    font-size: 1rem;
+    font-weight: 600;
+    color: variables.$text-dark;
+}
+
+.ccs-weather-logistics__icon {
+    font-size: 1.4rem;
+    margin-bottom: 5px;
+}
+
+.ccs-weather-logistics__label {
+    font-size: 0.75rem;
+    color: variables.$text-gray;
+    font-weight: 500;
+    margin-top: 4px;
+}
+
+.ccs-weather-logistics__stat--hydration {
+    color: variables.$brand-blue;
+    font-weight: 700;
+}
+
+// Alerta de Riesgo Dinámica (Dentro de la narrativa)
+.ccs-results__alert-text {
+    margin-top: 20px;
+    padding: 15px;
+    border-radius: var(--radius-sm);
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: variables.$text-dark;
+    display: none; // Controlado por JS
+}
+
+.ccs-results__alert-text.warning {
+    background-color: rgba(241, 196, 15, 0.15);
+    border-left: 5px solid variables.$color-warning;
+    color: #b88a00;
+}
+
+.ccs-results__alert-text.danger {
+    background-color: rgba(192, 57, 43, 0.15);
+    border-left: 5px solid variables.$color-danger;
+    color: #96281e;
+}
+
+/* --- Responsive (Asegúrate de que tus media queries lo incluyan) --- */
+@media (max-width: 500px) {
+    .ccs-time-logistics { flex-direction: column; gap: 15px; }
+    .ccs-weather-logistics { flex-direction: column; gap: 15px; }
 }

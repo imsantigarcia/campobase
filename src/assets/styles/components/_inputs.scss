@@ -104,3 +104,26 @@ select {
     background-position: right 0 center;
     background-size: 1em;
 }
+
+// Botón de Acción (Geocodificación)
+
+.ccs-btn-action {
+    background-color: var(--brand-orange); 
+    color: white; 
+    border: none; 
+    padding: 8px 18px; 
+    border-radius: var(--radius-sm); 
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    white-space: nowrap;
+}
+.ccs-btn-action:hover {
+    background-color: #d37a00;
+    transform: translateY(-1px);
+}
+.ccs-btn-action:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+    transform: none;
+}

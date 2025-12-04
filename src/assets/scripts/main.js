@@ -1,25 +1,33 @@
+// main.js
+/**
+ * Módulo Principal (Orquestador)
+ * Responsabilidad: Controlar el flujo, manejar eventos DOM, coordinar módulos y renderizar resultados finales.
+ */
 import { calculateRouteStats } from './modules/calc.js';
 import { formatTime } from './modules/utils.js';
 import { parseGPX } from './modules/gpx.js';
 import { renderElevationProfile } from './modules/charts.js';
+import { 
+    currentLocation, 
+    currentWeather, 
+    geocodeLocation,
+    fetchWeatherAndCalculateSafety
+} from './modules/safety-planner.js'; 
+
 
 // --- INICIALIZACIÓN ---
 document.addEventListener('DOMContentLoaded', () => {
-    // Inicializar inputs y eventos
     initSyncInputs();
     initEventListeners();
     
-    // Calcular inicial
+    // Llamada inicial (asíncrona)
     updateCalculation();
-    
-    // Nota: AOS se inicializa en index.html o aquí si lo importas vía NPM
-    // if (window.AOS) window.AOS.init(); 
 });
 
 // --- LÓGICA DE EVENTOS ---
 function initEventListeners() {
     // Inputs que disparan recálculo
-    const triggers = ['ccsTerrain', 'ccsProfile'];
+    const triggers = ['ccsTerrain', 'ccsProfile', 'ccsDate']; 
     triggers.forEach(id => {
         document.getElementById(id).addEventListener('change', updateCalculation);
     });
@@ -28,6 +36,15 @@ function initEventListeners() {
     const gpxInput = document.getElementById('ccsGpxInput');
     if (gpxInput) {
         gpxInput.addEventListener('change', handleGPXUpload);
+    }
+    
+    // Geocodificación (Llama a la función global en safety-planner)
+    const geocodeBtn = document.getElementById('ccsGeocodeBtn');
+    if (geocodeBtn) {
+        geocodeBtn.addEventListener('click', () => {
+            const locationName = document.getElementById('ccsLocationName').value;
+            geocodeLocation(locationName); 
+        });
     }
 }
 
@@ -50,17 +67,22 @@ function initSyncInputs() {
     });
 }
 
-// --- ORQUESTADOR PRINCIPAL ---
-function updateCalculation() {
+// --- ORQUESTADOR PRINCIPAL (ASÍNCRONO) ---
+async function updateCalculation() {
     // 1. Obtener valores DOM
     const data = getDOMValues();
     if (data.D === 0 || data.W === 0) return;
+    
+    // 2. Ejecutar Lógica Asíncrona de Seguridad (Clima/Sol)
+    // Usamos una versión temporal de las stats para obtener el tTotal
+    const tempStats = calculateRouteStats(data.D, data.Eplus, data.Eminus, data.W, data.Terrain, data.Profile, currentWeather);
+    const safetyLogistics = await fetchWeatherAndCalculateSafety(tempStats.tTotal);
 
-    // 2. Ejecutar Lógica Pura
-    const results = calculateRouteStats(data.D, data.Eplus, data.Eminus, data.W, data.Terrain, data.Profile);
+    // 3. Recalcular las estadísticas PURAS con la data de clima actualizada (esencial para Nutrición)
+    const finalStats = calculateRouteStats(data.D, data.Eplus, data.Eminus, data.W, data.Terrain, data.Profile, currentWeather);
 
-    // 3. Actualizar UI
-    renderResults(data, results);
+    // 4. Actualizar UI
+    renderResults(data, finalStats, safetyLogistics);
 }
 
 function handleGPXUpload(e) {
@@ -74,19 +96,23 @@ function handleGPXUpload(e) {
         try {
             const gpxData = parseGPX(evt.target.result);
             
-            // Actualizar inputs con datos del GPX
+            // 1. Actualizar coordenadas globales (para Sol/Clima)
+            currentLocation.lat = gpxData.lat0;
+            currentLocation.lon = gpxData.lon0;
+            currentLocation.source = 'gpx';
+            window.updateCoordHint(true, `${gpxData.lat0.toFixed(3)}° N, ${gpxData.lon0.toFixed(3)}° E (Inicio GPX)`);
+
+            // 2. Actualizar inputs con datos del GPX
             updateInputPair('ccsDistRange', 'ccsDistance', gpxData.distance);
             updateInputPair('ccsElevRange', 'ccsElevation', gpxData.elevationGain);
             updateInputPair('ccsElevNegRange', 'ccsElevationNegative', gpxData.elevationLoss);
 
-            // Feedback Visual
+            // 3. Feedback Visual y Gráfica
             document.getElementById('ccsGpxText').innerText = `Cargado: ${gpxData.distance}km | +${gpxData.elevationGain}m`;
-            
-            // Renderizar Gráfica
             document.getElementById('ccsProfileCard').classList.add('ccs-profile-card--visible');
             renderElevationProfile('elevationChart', gpxData.trackData);
 
-            // Recalcular todo
+            // 4. Recalcular todo
             updateCalculation();
 
         } catch (err) {
@@ -97,7 +123,7 @@ function handleGPXUpload(e) {
     reader.readAsText(file);
 }
 
-// --- HELPERS UI ---
+// --- HELPERS UI Y RENDERIZADO ---
 function getDOMValues() {
     return {
         D: parseFloat(document.getElementById('ccsDistance').value) || 0,
@@ -113,25 +139,62 @@ function updateInputPair(rangeId, numId, val) {
     const range = document.getElementById(rangeId);
     const num = document.getElementById(numId);
     
-    // Ajustar max del range si el valor es mayor
     if (val > parseFloat(range.max)) range.max = Math.ceil(val * 1.2);
     
     range.value = val;
     num.value = val;
 }
 
-function renderResults(inputs, stats) {
-    // Header Color
+function renderResults(inputs, stats, safety) {
+    // 1. Header y Stats Numéricos
     const header = document.getElementById('resHeader');
     header.innerText = `Dificultad física: ${stats.diffLabel}`;
     header.className = `ccs-results__header ${stats.diffClass}`;
 
-    // Stats Numéricos
     document.getElementById('resTotalTimeVal').innerText = formatTime(stats.tTotal);
     document.getElementById('resCaloriesVal').innerText = stats.calTotal;
     document.getElementById('resSendifScore').innerText = stats.sendifScore;
 
-    // Narrativa
+    // 2. Nutrición
+    document.getElementById('resHydrationVal').innerText = `${stats.nutrition.hydrationLiters} L`;
+    document.getElementById('resNutritionVal').innerText = `${stats.nutrition.carbsGrams} g`;
+
+    // 3. Lógica de Alertas (Priorización)
+    let narrativeAlert = safety.safetyAlert || ''; // Alerta de Sol/Logística
+    let alertClass = '';
+
+    // A. Clase de Alerta por Logística (Prioridad más alta)
+    if (safety.safetyAlert && safety.safetyAlert.includes('Alerta de Seguridad Logística')) {
+        alertClass = 'danger';
+    } else if (safety.safetyAlert && safety.safetyAlert.includes('Advertencia de Riesgo Logístico')) {
+        alertClass = 'warning';
+    }
+    
+    // B. Alerta de Desnivel Alto
+    if (inputs.Eplus >= 600) {
+        const dpAlert = `⛰️ **Advertencia DP Alto:** Desnivel positivo de ${inputs.Eplus}m. Los modelos de tiempo suelen **subestimar** rutas tan empinadas. Añade un 10-15% extra al tiempo estimado por seguridad.`;
+        narrativeAlert = narrativeAlert ? narrativeAlert + '<br><br>' + dpAlert : dpAlert;
+        alertClass = alertClass || 'warning'; 
+    }
+    
+    // C. Alerta de Hidratación/Calor
+    if (stats.nutrition.hydrationAlert) {
+        narrativeAlert = narrativeAlert ? narrativeAlert + '<br><br>' + stats.nutrition.hydrationAlert : stats.nutrition.hydrationAlert;
+        if (stats.nutrition.hydrationAlert.includes('ALERTA de Calor Extremo')) {
+            alertClass = 'danger';
+        } else if (alertClass !== 'danger') {
+            alertClass = 'warning';
+        }
+    }
+    
+    // D. Alerta de Fallo de Clima
+    if(currentWeather.error) {
+        const climateErr = `⚠️ **Advertencia de Clima:** No se pudo obtener el pronóstico del tiempo (${currentWeather.error}). Planifica con extrema precaución.`;
+        narrativeAlert = narrativeAlert ? narrativeAlert + '<br><br>' + climateErr : climateErr;
+        alertClass = alertClass || 'warning';
+    }
+
+    // 4. Narrativa Final
     const narrativeHTML = `
         Esta ruta de <strong>${inputs.D} km</strong> y <strong>${inputs.Eplus} m</strong> de desnivel positivo es de dificultad física <strong>${stats.diffLabel.toLowerCase()}</strong>. 
         Te llevará aproximadamente <strong>${formatTime(stats.tEffective)}</strong> en movimiento, 
@@ -139,5 +202,20 @@ function renderResults(inputs, stats) {
         Gasto calórico: <strong>${stats.calTotal} kcal</strong> (${inputs.W} kg, perfil ${stats.profileLabel}).
     `;
     document.getElementById('resNarrativeText').innerHTML = narrativeHTML;
+    
+    // Renderizar Alerta
+    const alertElement = document.getElementById('resAlert');
+    if (narrativeAlert) {
+        alertElement.innerHTML = narrativeAlert;
+        alertElement.className = `ccs-results__alert-text ${alertClass}`;
+        alertElement.style.display = 'block';
+    } else {
+        alertElement.style.display = 'none';
+    }
+
     document.getElementById('ccsResultCard').classList.add('ccs-results--visible');
 }
+
+// Nota: Las funciones helper updateCoordHint, formatTime, etc., se moverán a utils.js 
+// o se globalizarán si es necesario para el HTML. Asegúrate de que utils.js contenga 
+// las funciones formatTime, getDistanceFromLatLonInKm, y deg2rad.

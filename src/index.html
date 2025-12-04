@@ -1,40 +1,30 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <!-- 1. METADATOS ESENCIALES Y VIEWPORT -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Calculadora de Rutas - Camino con Santiago</title>
     
-    <!-- 2. FUENTES EXTERNAS (Montserrat) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700;800&display=swap" rel="stylesheet">
     
-    <!-- 3. LIBRERÍAS CSS / ANIMACIONES (AOS) -->
     <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
     
-    <!-- 4. HOJA DE ESTILOS PRINCIPAL -->
     <link rel="stylesheet" href="/src/assets/styles/main.scss">
     
-    <!-- 5. LIBRERÍAS JS SINCRÓNICAS (Chart.js) -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/suncalc@1.9.0/suncalc.min.js"></script> 
 </head>
 <body>
 
-    <!-- ========================================================= -->
-    <!-- CONTENIDO PRINCIPAL: CALCULADORA CCS -->
-    <!-- ========================================================= -->
     <div class="ccs-calculator" data-aos="fade-up" data-aos-duration="1000">
         
-        <!-- ENCABEZADO Y TÍTULO -->
         <header class="ccs-calculator__header" data-aos="fade-down" data-aos-delay="200">
-            <!-- NOTA: Usar un logo accesible es clave. La ruta debe ser correcta. -->
             <img src="/src/assets/images/logo.png" alt="Logo Camino con Santiago" class="ccs-calculator__logo">
             <p class="ccs-calculator__subtitle">Calcula tu próxima salida con el método MIDE y SENDIF</p>
         </header>
 
-        <!-- SUBIDA DE ARCHIVO GPX (Opcional) -->
         <div class="ccs-file-upload" data-aos="fade-up" data-aos-delay="250">
             <input type="file" id="ccsGpxInput" accept=".gpx" class="ccs-file-upload__input">
             <label for="ccsGpxInput" class="ccs-file-upload__label">
@@ -44,10 +34,24 @@
             <p class="ccs-file-upload__hint">Calcularemos la distancia y desniveles automáticamente.</p>
         </div>
 
-        <!-- CONTROLES DE ENTRADA (GRID) -->
         <div class="ccs-grid">
             
-            <!-- Entrada 1: Distancia (km) -->
+            <div class="ccs-input-group ccs-grid__full-width" data-aos="fade-up" data-aos-delay="280">
+                <label class="ccs-input-group__label">Punto de inicio o municipio (Para calcular horarios de sol)</label>
+                <div class="ccs-input-group__control">
+                    <input type="text" id="ccsLocationName" placeholder="Ej: Reus, Tarragona" style="flex-grow: 1;">
+                    <button id="ccsGeocodeBtn" class="ccs-btn-action">Calcular</button>
+                </div>
+                <p class="ccs-file-upload__hint" id="ccsCoordHint">Coordenadas: No definidas</p>
+            </div>
+            
+            <div class="ccs-input-group ccs-grid__full-width" data-aos="fade-up" data-aos-delay="300">
+                <label class="ccs-input-group__label">Fecha de la Salida</label>
+                <div class="ccs-input-group__control">
+                    <input type="date" id="ccsDate" value="2025-12-03" style="width: 100%; border: none; font-size: 1rem; color: var(--text-dark); padding: 0;">
+                </div>
+            </div>
+
             <div class="ccs-input-group" data-aos="fade-up" data-aos-delay="300">
                 <label for="ccsDistance" class="ccs-input-group__label">Distancia (km)</label>
                 <div class="ccs-input-group__control">
@@ -55,8 +59,7 @@
                     <input type="number" id="ccsDistance" min="1" step="0.1" value="10">
                 </div>
             </div>
-
-            <!-- Entrada 2: Peso Total (kg) -->
+            
             <div class="ccs-input-group" data-aos="fade-up" data-aos-delay="400">
                 <label for="ccsWeight" class="ccs-input-group__label">Peso total (peso corporal + mochila)</label>
                 <div class="ccs-input-group__control">
@@ -65,7 +68,6 @@
                 </div>
             </div>
 
-            <!-- Entrada 3: Desnivel Positivo (m) -->
             <div class="ccs-input-group" data-aos="fade-up" data-aos-delay="500">
                 <label for="ccsElevation" class="ccs-input-group__label">Desnivel positivo o ascenso (m)</label>
                 <div class="ccs-input-group__control">
@@ -74,7 +76,6 @@
                 </div>
             </div>
 
-            <!-- Entrada 4: Desnivel Negativo (m) -->
             <div class="ccs-input-group" data-aos="fade-up" data-aos-delay="600">
                 <label for="ccsElevationNegative" class="ccs-input-group__label">Desnivel negativo o descenso (m)</label>
                 <div class="ccs-input-group__control">
@@ -83,11 +84,9 @@
                 </div>
             </div>
 
-            <!-- Entrada 5: Tipo de Terreno (Select) -->
             <div class="ccs-input-group ccs-grid__full-width" data-aos="fade-up" data-aos-delay="700">
                 <label for="ccsTerrain" class="ccs-input-group__label">Tipo de terreno predominante</label>
                 <div class="ccs-input-group__control">
-                    <!-- Nota: Se añaden IDs a los labels y a los select para accesibilidad -->
                     <select id="ccsTerrain">
                         <option value="5">Pista forestal</option>
                         <option value="4" selected>Camino de montaña o sendero</option>
@@ -96,7 +95,6 @@
                 </div>
             </div>
 
-            <!-- Entrada 6: Perfil Físico (Select) -->
             <div class="ccs-input-group ccs-grid__full-width" data-aos="fade-up" data-aos-delay="800">
                 <label for="ccsProfile" class="ccs-input-group__label">Selecciona un perfil físico</label>
                 <div class="ccs-input-group__control">
@@ -108,15 +106,12 @@
                 </div>
             </div>
         </div>
-
-        <!-- SECCIÓN DE RESULTADOS (Salida) -->
         <div id="ccsResultCard" class="ccs-results" data-aos="zoom-in" data-aos-delay="900" data-aos-offset="10">
             
             <div id="resHeader" class="ccs-results__header ccs-results__header--mod">
                 Dificultad física: Moderada
             </div>
 
-            <!-- Métricas Clave -->
             <div class="ccs-results__grid">
                 <div class="ccs-results__stat-box">
                     <span class="ccs-results__value" id="resTotalTimeVal">2h 45m</span>
@@ -131,17 +126,50 @@
                     <span class="ccs-results__label">Puntos SENDIF</span>
                 </div>
             </div>
-
-            <!-- Narrativa y Descargo de Responsabilidad -->
+            
+            <div id="ccsTimeLogistics" class="ccs-time-logistics">
+                <div class="ccs-time-logistics__stat">
+                    <span class="ccs-time-logistics__icon">🌅</span>
+                    <span id="resSunriseTime">08:00</span>
+                    <span class="ccs-time-logistics__label">Amanecer</span>
+                </div>
+                <div class="ccs-time-logistics__stat ccs-time-logistics__stat--critical">
+                    <span class="ccs-time-logistics__icon">⏰</span>
+                    <span id="resSunsetLimit">17:00</span>
+                    <span class="ccs-time-logistics__label">Hora Límite (Seguridad)</span>
+                </div>
+                <div class="ccs-time-logistics__stat">
+                    <span class="ccs-time-logistics__icon">🌇</span>
+                    <span id="resSunsetTime">18:30</span>
+                    <span class="ccs-time-logistics__label">Anochecer</span>
+                </div>
+            </div>
+            
+            <div id="ccsWeatherLogistics" class="ccs-weather-logistics">
+                <div class="ccs-weather-logistics__stat">
+                    <span class="ccs-weather-logistics__icon" id="resWeatherIcon">❓</span>
+                    <span id="resTemp">N/D</span>
+                    <span class="ccs-weather-logistics__label">Clima / Viento</span>
+                </div>
+                <div class="ccs-weather-logistics__stat ccs-weather-logistics__stat--hydration">
+                    <span class="ccs-weather-logistics__icon">💧</span>
+                    <span id="resHydrationVal">1.5 L</span>
+                    <span class="ccs-weather-logistics__label">Agua (Mín.)</span>
+                </div>
+                <div class="ccs-weather-logistics__stat">
+                    <span class="ccs-weather-logistics__icon">🥖</span>
+                    <span id="resNutritionVal">350 g</span>
+                    <span class="ccs-weather-logistics__label">Comida / Snacks</span>
+                </div>
+            </div>
             <div class="ccs-results__narrative">
                 <p id="resNarrativeText">Calculando datos...</p>
+                <p id="resAlert" class="ccs-results__alert-text"></p> 
                 <p class="ccs-results__disclaimer">
                     ⚠ Recuerda: Estos datos son meramente informativos y basados en modelos teóricos (MIDE/SENDIF). Las actividades en el medio natural son potencialmente peligrosas y dependen de factores cambiantes como el clima.
                 </p>
             </div>
         </div>
-
-        <!-- PERFIL DE ELEVACIÓN (Gráfico) -->
         <div id="ccsProfileCard" class="ccs-results ccs-profile-card" data-aos="fade-up">
             <div class="ccs-results__header ccs-results__header--mod">
                 Perfil de Elevación
@@ -151,14 +179,10 @@
             </div>
         </div>
     </div>
-
-    <!-- 6. SCRIPTS ASÍNCRONOS (AOS) -->
     <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
     
-    <!-- 7. SCRIPT PRINCIPAL DE LA APLICACIÓN -->
-    <script type="module" src="assets/scripts/main.js"></script>
+    <script type="module" src="/src/assets/scripts/main.js"></script>
 
-    <!-- 8. INICIALIZACIÓN DE SCRIPTS -->
     <script>
         // Inicialización de la librería de animaciones
         AOS.init();

@@ -1,12 +1,36 @@
+// src/assets/styles/base/_settings.scss
+
+@use "../variables" as var; // Alias 'var'
+
+/* Definiciones CSS custom properties para uso en JS y componentes */
+
+$font-family-sans-serif: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+  "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji",
+  "Segoe UI Symbol";
+$font-family-serif: "Georgia", "Times New Roman", serif;
+
+
+// Variables SCSS
+$text-dark: #2c3e50;
+$text-gray: #555555;
+$text-light: #999999;
+
+$brand-blue: #3b8bfa;
+$brand-orange: #f08c00;
+
+$color-warning: #f1c40f;
+$color-danger: #c0392b;
+
+$radius-lg: 16px;
+$radius-sm: 8px;
+
 :root {
-    /* Paleta Corporativa */
-    --brand-blue: #3b8bfa;
-    --brand-orange: #f08c00;
-    
-    /* Textos */
-    --text-dark: #2c3e50;
-    --text-gray: #555555;
-    --text-light: #999999;
+    /* Paleta Corporativa (Acceso desde CSS y JS) */
+    --brand-blue: #{$brand-blue};
+    --brand-orange: #{$brand-orange};
+    --text-dark: #{$text-dark};
+    --text-gray: #{$text-gray};
+    --text-light: #{$text-light};
     
     /* UI Elements */
     --slider-track: #cbd5e1;
@@ -14,7 +38,11 @@
     --input-bg: #ffffff;
     
     /* Espaciado y Bordes */
-    --radius-lg: 16px;
-    --radius-sm: 8px;
+    --radius-lg: #{$radius-lg};
+    --radius-sm: #{$radius-sm};
     --shadow-soft: 0 10px 40px rgba(0,0,0,0.05);
+
+    /* Colores de Alerta (Acceso directo por JS) */
+    --color-warning: #{$color-warning};
+    --color-danger: #{$color-danger};
 }

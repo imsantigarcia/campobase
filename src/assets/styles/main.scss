@@ -1,10 +1,22 @@
-// 1. Configuración y Base
-@use 'base/settings';
-@use 'base/base';
+// src/assets/styles/main.scss
 
-// 2. Componentes (Módulos)
-@use 'components/calculator';
-@use 'components/inputs';
-@use 'components/upload';
-@use 'components/results';
-@use 'components/chart';
+// 1. VARIABLES GLOBALES (CRÍTICO: El archivo está en la misma carpeta)
+@use 'variables' as *; 
+
+// 2. BASE SETTINGS (CRÍTICO: Ruta corregida a './base/settings')
+@use './base/settings';    
+
+// 3. BASE 
+@use './base/base';      
+
+// 4. LAYOUTS
+@use './layouts/home';
+@use 'dependencies';
+
+// 5. COMPONENTS
+@use './components/upload';
+@use './components/inputs';     
+@use './components/calculator';
+@use './components/results';    
+@use './components/chart';
+
