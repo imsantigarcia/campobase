@@ -1,0 +1,206 @@
+<!-- =========================================================
+     SECCIÓN DE PLANIFICACIÓN (fecha + ubicación)
+     Insertar ANTES del bloque <div class="ccs-grid">
+     ========================================================= -->
+<div class="ccs-planning" data-aos="fade-up" data-aos-delay="260">
+    <h3 class="ccs-planning__title">📅 Planificación</h3>
+    <div class="ccs-planning__row">
+
+        <!-- Fecha de la salida -->
+        <div class="ccs-input-group ccs-input-group--inline">
+            <label for="ccsDate" class="ccs-input-group__label">Fecha de la salida</label>
+            <div class="ccs-input-group__control">
+                <input type="date" id="ccsDate">
+            </div>
+        </div>
+
+        <!-- Latitud -->
+        <div class="ccs-input-group ccs-input-group--inline">
+            <label for="ccsLat" class="ccs-input-group__label">
+                Latitud
+                <span class="ccs-input-group__hint" title="Se rellena automáticamente con tu ubicación">
+                    📍
+                </span>
+            </label>
+            <div class="ccs-input-group__control">
+                <input type="number" id="ccsLat" step="0.0001" min="-90" max="90"
+                       value="40.4168" placeholder="ej. 42.8500">
+            </div>
+        </div>
+
+        <!-- Longitud -->
+        <div class="ccs-input-group ccs-input-group--inline">
+            <label for="ccsLng" class="ccs-input-group__label">Longitud</label>
+            <div class="ccs-input-group__control">
+                <input type="number" id="ccsLng" step="0.0001" min="-180" max="180"
+                       value="-3.7038" placeholder="ej. -1.6200">
+            </div>
+        </div>
+
+    </div>
+</div>
+
+
+<!-- =========================================================
+     CONTROLES DE ENTRADA (ccs-grid) — versión actualizada
+     Reemplaza el bloque <div class="ccs-grid"> completo
+     ========================================================= -->
+<div class="ccs-grid">
+
+    <!-- Distancia -->
+    <div class="ccs-input-group" data-aos="fade-up" data-aos-delay="300">
+        <label for="ccsDistance" class="ccs-input-group__label">Distancia (km)</label>
+        <div class="ccs-input-group__control">
+            <input type="range"  id="ccsDistRange" min="1" max="50"   step="0.5" value="10">
+            <input type="number" id="ccsDistance"  min="1" step="0.1" value="10">
+        </div>
+    </div>
+
+    <!-- Peso Total -->
+    <div class="ccs-input-group" data-aos="fade-up" data-aos-delay="400">
+        <label for="ccsWeight" class="ccs-input-group__label">Peso total (cuerpo + mochila) en kg</label>
+        <div class="ccs-input-group__control">
+            <input type="range"  id="ccsWeightRange" min="40" max="130" step="1" value="75">
+            <input type="number" id="ccsWeight"      min="1"            value="75">
+        </div>
+    </div>
+
+    <!-- Desnivel Positivo -->
+    <div class="ccs-input-group" data-aos="fade-up" data-aos-delay="500">
+        <label for="ccsElevation" class="ccs-input-group__label">Desnivel positivo / ascenso (m)</label>
+        <div class="ccs-input-group__control">
+            <input type="range"  id="ccsElevRange" min="0" max="5000" step="50" value="200">
+            <input type="number" id="ccsElevation" min="0" step="10"  value="200">
+        </div>
+    </div>
+
+    <!-- Desnivel Negativo -->
+    <div class="ccs-input-group" data-aos="fade-up" data-aos-delay="600">
+        <label for="ccsElevationNegative" class="ccs-input-group__label">Desnivel negativo / descenso (m)</label>
+        <div class="ccs-input-group__control">
+            <input type="range"  id="ccsElevNegRange"      min="0" max="5000" step="50" value="200">
+            <input type="number" id="ccsElevationNegative" min="0" step="10"  value="200">
+        </div>
+    </div>
+
+    <!-- Tipo de Terreno -->
+    <div class="ccs-input-group ccs-grid__full-width" data-aos="fade-up" data-aos-delay="700">
+        <label for="ccsTerrain" class="ccs-input-group__label">Tipo de terreno predominante</label>
+        <div class="ccs-input-group__control">
+            <select id="ccsTerrain">
+                <option value="5">Pista forestal</option>
+                <option value="4" selected>Camino de montaña / sendero</option>
+                <option value="3">Sendero complejo</option>
+                <option value="2">Trail técnico / Roca</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- Velocidad en llano -->
+    <div class="ccs-input-group" data-aos="fade-up" data-aos-delay="800">
+        <label for="ccsFlatSpeed" class="ccs-input-group__label">Velocidad en llano</label>
+        <div class="ccs-input-group__control">
+            <select id="ccsFlatSpeed">
+                <option value="slow">Lento</option>
+                <option value="normal" selected>Normal</option>
+                <option value="fast">Rápido</option>
+                <option value="vfast">Muy rápido</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- Capacidad vertical -->
+    <div class="ccs-input-group" data-aos="fade-up" data-aos-delay="850">
+        <label for="ccsVerticalProfile" class="ccs-input-group__label">Capacidad de ascenso</label>
+        <div class="ccs-input-group__control">
+            <select id="ccsVerticalProfile">
+                <option value="beginner">Principiante (~300 m/h)</option>
+                <option value="intermediate" selected>Intermedio (~400 m/h)</option>
+                <option value="advanced">Avanzado (~550 m/h)</option>
+                <option value="expert">Experto (~700 m/h)</option>
+            </select>
+        </div>
+    </div>
+
+    <!--
+        SEXO Y EDAD: ahora son dos inputs separados con sus propios labels.
+        Anteriormente compartían un label, lo que era confuso.
+    -->
+
+    <!-- Sexo (campo propio) -->
+    <div class="ccs-input-group" data-aos="fade-up" data-aos-delay="870">
+        <label for="ccsSex" class="ccs-input-group__label">
+            Sexo biológico
+            <span class="ccs-input-group__hint">(mejora el cálculo calórico)</span>
+        </label>
+        <div class="ccs-input-group__control">
+            <select id="ccsSex">
+                <option value="">No especificado</option>
+                <option value="male">Hombre</option>
+                <option value="female">Mujer</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- Edad (campo propio) -->
+    <div class="ccs-input-group" data-aos="fade-up" data-aos-delay="880">
+        <label for="ccsAge" class="ccs-input-group__label">
+            Edad
+            <span class="ccs-input-group__hint">(mejora el cálculo calórico)</span>
+        </label>
+        <div class="ccs-input-group__control">
+            <input type="number" id="ccsAge" min="10" max="100" step="1"
+                   placeholder="años">
+        </div>
+    </div>
+
+</div>
+<!-- FIN ccs-grid -->
+
+
+<!-- =========================================================
+     TARJETA DE SEGURIDAD HORARIA
+     Insertar ENTRE el resultado principal y el perfil de elevación
+     ========================================================= -->
+<div id="ccsSafetyCard" class="ccs-results ccs-safety" data-aos="fade-up">
+
+    <!-- Header semáforo (se actualiza via JS) -->
+    <div class="ccs-safety__header ccs-safety__header--ok">
+        <span class="ccs-safety__icon">✅</span>
+        <span>Margen suficiente</span>
+    </div>
+
+    <!-- Hora máxima destacada -->
+    <div class="ccs-safety__hero">
+        <span class="ccs-safety__hero-label">Hora máxima de salida</span>
+        <span class="ccs-safety__hero-time" id="safetyLatestStart">--:--</span>
+        <span class="ccs-safety__hero-note">
+            Basada en el crepúsculo civil · margen de seguridad incluido
+        </span>
+    </div>
+
+    <!-- Línea de tiempo -->
+    <div class="ccs-safety__timeline-wrap">
+        <canvas id="safetyTimeline"></canvas>
+    </div>
+
+    <!-- Datos solares secundarios -->
+    <div class="ccs-safety__solar-grid">
+        <div class="ccs-safety__solar-item">
+            <span class="ccs-safety__solar-icon">🌅</span>
+            <span class="ccs-safety__solar-label">Amanecer</span>
+            <span class="ccs-safety__solar-val" id="safetySunrise">--:--</span>
+        </div>
+        <div class="ccs-safety__solar-item">
+            <span class="ccs-safety__solar-icon">🌇</span>
+            <span class="ccs-safety__solar-label">Atardecer</span>
+            <span class="ccs-safety__solar-val" id="safetySunset">--:--</span>
+        </div>
+        <div class="ccs-safety__solar-item">
+            <span class="ccs-safety__solar-icon">🌑</span>
+            <span class="ccs-safety__solar-label">Crepúsculo civil</span>
+            <span class="ccs-safety__solar-val" id="safetyCivil">--:--</span>
+        </div>
+    </div>
+
+</div>

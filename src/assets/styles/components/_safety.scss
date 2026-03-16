@@ -1,0 +1,170 @@
+// _safety.scss
+// Estilos para la tarjeta de seguridad horaria y el bloque de planificación.
+// Añadir a main.scss: @use 'components/safety';
+
+// ─── BLOQUE DE PLANIFICACIÓN ─────────────────────────────────────────────────
+.ccs-planning {
+    margin-bottom: 30px;
+    padding: 24px 28px;
+    background: #f8faff;
+    border-radius: var(--radius-sm);
+    border: 1px solid #e4ecff;
+
+    &__title {
+        font-size: 0.9rem;
+        font-weight: 700;
+        color: var(--brand-blue);
+        margin: 0 0 18px 0;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+    }
+
+    &__row {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 20px;
+
+        @media (max-width: 600px) {
+            grid-template-columns: 1fr;
+        }
+    }
+}
+
+// Input inline (para la fila de planificación)
+.ccs-input-group--inline {
+    .ccs-input-group__label {
+        font-size: 0.82rem;
+    }
+
+    input[type="date"],
+    input[type="number"] {
+        width: 100%;
+        padding: 8px 10px;
+        border: 1px solid #dde4f0;
+        border-radius: 6px;
+        font-size: 0.95rem;
+        font-family: inherit;
+        color: var(--text-dark);
+        background: #fff;
+
+        &:focus {
+            outline: none;
+            border-color: var(--brand-blue);
+        }
+    }
+}
+
+// Hint de label (texto secundario dentro del label)
+.ccs-input-group__hint {
+    font-weight: 400;
+    font-size: 0.78rem;
+    color: #999;
+    margin-left: 4px;
+}
+
+// ─── TARJETA DE SEGURIDAD ────────────────────────────────────────────────────
+.ccs-safety {
+    margin-top: 30px;
+
+    // Header semáforo
+    &__header {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 16px 24px;
+        font-weight: 700;
+        font-size: 1rem;
+        transition: background-color 0.3s, color 0.3s;
+
+        &--ok {
+            background-color: rgba(34, 197, 94, 0.10);
+            color: #16a34a;
+        }
+        &--warn {
+            background-color: rgba(251, 191, 36, 0.15);
+            color: #d97706;
+        }
+        &--danger {
+            background-color: rgba(239, 68, 68, 0.10);
+            color: #dc2626;
+        }
+    }
+
+    &__icon {
+        font-size: 1.2rem;
+        line-height: 1;
+    }
+
+    // Hora máxima destacada
+    &__hero {
+        text-align: center;
+        padding: 28px 20px 20px;
+        border-bottom: 1px solid #f0f0f0;
+    }
+
+    &__hero-label {
+        display: block;
+        font-size: 0.78rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        color: var(--text-light);
+        margin-bottom: 6px;
+    }
+
+    &__hero-time {
+        display: block;
+        font-size: 3rem;
+        font-weight: 800;
+        color: var(--brand-orange);
+        letter-spacing: -1px;
+        line-height: 1;
+        margin-bottom: 8px;
+    }
+
+    &__hero-note {
+        display: block;
+        font-size: 0.78rem;
+        color: #aaa;
+        font-style: italic;
+    }
+
+    // Línea de tiempo
+    &__timeline-wrap {
+        padding: 28px 24px 18px;
+
+        canvas {
+            width: 100%;
+            display: block;
+        }
+    }
+
+    // Grid datos solares
+    &__solar-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        border-top: 1px solid #f0f0f0;
+        padding: 16px 10px 20px;
+
+        @media (max-width: 500px) {
+            grid-template-columns: 1fr;
+            gap: 12px;
+        }
+    }
+
+    &__solar-item {
+        text-align: center;
+        padding: 4px 8px;
+        border-right: 1px solid #eee;
+
+        &:last-child { border-right: none; }
+
+        @media (max-width: 500px) {
+            border-right: none;
+        }
+    }
+
+    &__solar-icon  { display: block; font-size: 1.3rem; margin-bottom: 4px; }
+    &__solar-label { display: block; font-size: 0.72rem; color: var(--text-light); font-weight: 600; margin-bottom: 2px; }
+    &__solar-val   { display: block; font-size: 1.1rem; font-weight: 700; color: var(--text-dark); }
+}
