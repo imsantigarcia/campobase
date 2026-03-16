@@ -2,66 +2,6 @@
 // Estilos para la tarjeta de seguridad horaria y el bloque de planificación.
 // Añadir a main.scss: @use 'components/safety';
 
-// ─── BLOQUE DE PLANIFICACIÓN ─────────────────────────────────────────────────
-.ccs-planning {
-    margin-bottom: 30px;
-    padding: 24px 28px;
-    background: #f8faff;
-    border-radius: var(--radius-sm);
-    border: 1px solid #e4ecff;
-
-    &__title {
-        font-size: 0.9rem;
-        font-weight: 700;
-        color: var(--brand-blue);
-        margin: 0 0 18px 0;
-        text-transform: uppercase;
-        letter-spacing: 0.04em;
-    }
-
-    &__row {
-        display: grid;
-        grid-template-columns: 1fr 1fr 1fr;
-        gap: 20px;
-
-        @media (max-width: 600px) {
-            grid-template-columns: 1fr;
-        }
-    }
-}
-
-// Input inline (para la fila de planificación)
-.ccs-input-group--inline {
-    .ccs-input-group__label {
-        font-size: 0.82rem;
-    }
-
-    input[type="date"],
-    input[type="number"] {
-        width: 100%;
-        padding: 8px 10px;
-        border: 1px solid #dde4f0;
-        border-radius: 6px;
-        font-size: 0.95rem;
-        font-family: inherit;
-        color: var(--text-dark);
-        background: #fff;
-
-        &:focus {
-            outline: none;
-            border-color: var(--brand-blue);
-        }
-    }
-}
-
-// Hint de label (texto secundario dentro del label)
-.ccs-input-group__hint {
-    font-weight: 400;
-    font-size: 0.78rem;
-    color: #999;
-    margin-left: 4px;
-}
-
 // ─────────────────────────────────────────────────────────────
 // TARJETA DE SEGURIDAD HORARIA
 // ─────────────────────────────────────────────────────────────
