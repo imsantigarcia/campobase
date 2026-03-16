@@ -44,69 +44,106 @@
             <p class="ccs-file-upload__hint">Calcularemos la distancia y desniveles automáticamente.</p>
         </div>
 
-        <!-- CONTROLES DE ENTRADA (GRID) -->
         <div class="ccs-grid">
-            
+
             <!-- Entrada 1: Distancia (km) -->
             <div class="ccs-input-group" data-aos="fade-up" data-aos-delay="300">
                 <label for="ccsDistance" class="ccs-input-group__label">Distancia (km)</label>
                 <div class="ccs-input-group__control">
-                    <input type="range" id="ccsDistRange" min="1" max="50" step="0.5" value="10">
-                    <input type="number" id="ccsDistance" min="1" step="0.1" value="10">
+                    <input type="range"  id="ccsDistRange" min="1" max="50"   step="0.5" value="10">
+                    <input type="number" id="ccsDistance"  min="1" step="0.1" value="10">
                 </div>
             </div>
 
             <!-- Entrada 2: Peso Total (kg) -->
             <div class="ccs-input-group" data-aos="fade-up" data-aos-delay="400">
-                <label for="ccsWeight" class="ccs-input-group__label">Peso total (peso corporal + mochila)</label>
+                <label for="ccsWeight" class="ccs-input-group__label">Peso total (cuerpo + mochila) en kg</label>
                 <div class="ccs-input-group__control">
-                    <input type="range" id="ccsWeightRange" min="40" max="130" step="1" value="75">
-                    <input type="number" id="ccsWeight" min="1" value="75">
+                    <input type="range"  id="ccsWeightRange" min="40" max="130" step="1" value="75">
+                    <input type="number" id="ccsWeight"      min="1"            value="75">
                 </div>
             </div>
 
             <!-- Entrada 3: Desnivel Positivo (m) -->
             <div class="ccs-input-group" data-aos="fade-up" data-aos-delay="500">
-                <label for="ccsElevation" class="ccs-input-group__label">Desnivel positivo o ascenso (m)</label>
+                <label for="ccsElevation" class="ccs-input-group__label">Desnivel positivo / ascenso (m)</label>
                 <div class="ccs-input-group__control">
-                    <input type="range" id="ccsElevRange" min="0" max="3000" step="50" value="200">
-                    <input type="number" id="ccsElevation" min="0" step="10" value="200">
+                    <input type="range"  id="ccsElevRange" min="0" max="5000" step="50" value="200">
+                    <input type="number" id="ccsElevation" min="0" step="10"  value="200">
                 </div>
             </div>
 
             <!-- Entrada 4: Desnivel Negativo (m) -->
             <div class="ccs-input-group" data-aos="fade-up" data-aos-delay="600">
-                <label for="ccsElevationNegative" class="ccs-input-group__label">Desnivel negativo o descenso (m)</label>
+                <label for="ccsElevationNegative" class="ccs-input-group__label">Desnivel negativo / descenso (m)</label>
                 <div class="ccs-input-group__control">
-                    <input type="range" id="ccsElevNegRange" min="0" max="3000" step="50" value="200">
-                    <input type="number" id="ccsElevationNegative" min="0" step="10" value="200">
+                    <input type="range"  id="ccsElevNegRange"        min="0" max="5000" step="50" value="200">
+                    <input type="number" id="ccsElevationNegative"   min="0" step="10"  value="200">
                 </div>
             </div>
 
-            <!-- Entrada 5: Tipo de Terreno (Select) -->
+            <!-- Entrada 5: Tipo de Terreno -->
             <div class="ccs-input-group ccs-grid__full-width" data-aos="fade-up" data-aos-delay="700">
                 <label for="ccsTerrain" class="ccs-input-group__label">Tipo de terreno predominante</label>
                 <div class="ccs-input-group__control">
-                    <!-- Nota: Se añaden IDs a los labels y a los select para accesibilidad -->
                     <select id="ccsTerrain">
                         <option value="5">Pista forestal</option>
-                        <option value="4" selected>Camino de montaña o sendero</option>
+                        <option value="4" selected>Camino de montaña / sendero</option>
                         <option value="3">Sendero complejo</option>
+                        <option value="2">Trail técnico / Roca</option>
                     </select>
                 </div>
             </div>
 
-            <!-- Entrada 6: Perfil Físico (Select) -->
-            <div class="ccs-input-group ccs-grid__full-width" data-aos="fade-up" data-aos-delay="800">
-                <label for="ccsProfile" class="ccs-input-group__label">Selecciona un perfil físico</label>
+            <!-- Entrada 6: Velocidad en llano -->
+            <div class="ccs-input-group" data-aos="fade-up" data-aos-delay="800">
+                <label for="ccsFlatSpeed" class="ccs-input-group__label">Velocidad en llano</label>
                 <div class="ccs-input-group__control">
-                    <select id="ccsProfile">
-                        <option value="beginner">Iniciación (ritmo pausado)</option>
-                        <option value="average" selected>Senderista (ritmo estándar)</option>
-                        <option value="expert">Deportivo (ritmo ágil)</option>
+                    <select id="ccsFlatSpeed">
+                        <option value="slow">Lento</option>
+                        <option value="normal" selected>Normal</option>
+                        <option value="fast">Rápido</option>
+                        <option value="vfast">Muy rápido</option>
                     </select>
                 </div>
             </div>
+
+            <!-- Entrada 7: Capacidad vertical -->
+            <div class="ccs-input-group" data-aos="fade-up" data-aos-delay="850">
+                <label for="ccsVerticalProfile" class="ccs-input-group__label">Capacidad de ascenso</label>
+                <div class="ccs-input-group__control">
+                    <select id="ccsVerticalProfile">
+                        <option value="beginner">Principiante (~300 m/h)</option>
+                        <option value="intermediate" selected>Intermedio (~400 m/h)</option>
+                        <option value="advanced">Avanzado (~550 m/h)</option>
+                        <option value="expert">Experto (~700 m/h)</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Entrada 8 (opcional): Sexo y Edad — para corregir el MET calórico -->
+            <div class="ccs-input-group ccs-grid__full-width" data-aos="fade-up" data-aos-delay="900">
+                <label class="ccs-input-group__label">
+                    Datos personales <span style="font-weight:400; font-size:0.85rem; color:#888">(opcionales, mejoran el cálculo calórico)</span>
+                </label>
+                <div class="ccs-input-group__control" style="gap: 24px; flex-wrap: wrap;">
+
+                    <select id="ccsSex" style="width: auto;">
+                        <option value="">Sexo (no especificado)</option>
+                        <option value="male">Hombre</option>
+                        <option value="female">Mujer</option>
+                    </select>
+
+                    <div style="display:flex; align-items:center; gap:8px;">
+                        <label for="ccsAge" style="font-size:0.95rem; color:var(--text-dark); white-space:nowrap;">
+                            Edad (años)
+                        </label>
+                        <input type="number" id="ccsAge" min="10" max="100" step="1" placeholder="—"
+                            style="width:65px;">
+                    </div>
+                </div>
+            </div>
+
         </div>
 
         <!-- SECCIÓN DE RESULTADOS (Salida) -->
