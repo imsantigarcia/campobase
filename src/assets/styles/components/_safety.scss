@@ -62,11 +62,11 @@
     margin-left: 4px;
 }
 
-// ─── TARJETA DE SEGURIDAD ────────────────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────
+// TARJETA DE SEGURIDAD HORARIA
+// ─────────────────────────────────────────────────────────────
 .ccs-safety {
-    margin-top: 30px;
 
-    // Header semáforo
     &__header {
         display: flex;
         align-items: center;
@@ -76,26 +76,13 @@
         font-size: 1rem;
         transition: background-color 0.3s, color 0.3s;
 
-        &--ok {
-            background-color: rgba(34, 197, 94, 0.10);
-            color: #16a34a;
-        }
-        &--warn {
-            background-color: rgba(251, 191, 36, 0.15);
-            color: #d97706;
-        }
-        &--danger {
-            background-color: rgba(239, 68, 68, 0.10);
-            color: #dc2626;
-        }
+        &--ok      { background: rgba(34,197,94,.10);  color: #16a34a; }
+        &--warn    { background: rgba(251,191,36,.15); color: #d97706; }
+        &--danger  { background: rgba(239,68,68,.10);  color: #dc2626; }
     }
 
-    &__icon {
-        font-size: 1.2rem;
-        line-height: 1;
-    }
+    &__icon { font-size: 1.2rem; line-height: 1; }
 
-    // Hora máxima destacada
     &__hero {
         text-align: center;
         padding: 28px 20px 20px;
@@ -104,7 +91,7 @@
 
     &__hero-label {
         display: block;
-        font-size: 0.78rem;
+        font-size: 0.75rem;
         font-weight: 600;
         text-transform: uppercase;
         letter-spacing: 0.06em;
@@ -124,47 +111,111 @@
 
     &__hero-note {
         display: block;
-        font-size: 0.78rem;
+        font-size: 0.76rem;
         color: #aaa;
         font-style: italic;
     }
 
-    // Línea de tiempo
     &__timeline-wrap {
-        padding: 28px 24px 18px;
-
-        canvas {
-            width: 100%;
-            display: block;
-        }
+        padding: 26px 24px 14px;
+        canvas { width: 100%; display: block; }
     }
 
-    // Grid datos solares
     &__solar-grid {
         display: grid;
         grid-template-columns: repeat(3, 1fr);
         border-top: 1px solid #f0f0f0;
-        padding: 16px 10px 20px;
+        padding: 14px 10px 18px;
 
-        @media (max-width: 500px) {
-            grid-template-columns: 1fr;
-            gap: 12px;
-        }
+        @media (max-width: 500px) { grid-template-columns: 1fr; gap: 12px; }
     }
 
     &__solar-item {
         text-align: center;
         padding: 4px 8px;
         border-right: 1px solid #eee;
-
         &:last-child { border-right: none; }
-
-        @media (max-width: 500px) {
-            border-right: none;
-        }
+        @media (max-width: 500px) { border-right: none; }
     }
 
-    &__solar-icon  { display: block; font-size: 1.3rem; margin-bottom: 4px; }
-    &__solar-label { display: block; font-size: 0.72rem; color: var(--text-light); font-weight: 600; margin-bottom: 2px; }
-    &__solar-val   { display: block; font-size: 1.1rem; font-weight: 700; color: var(--text-dark); }
+    &__solar-icon  { display: block; font-size: 1.2rem; margin-bottom: 3px; }
+    &__solar-label { display: block; font-size: 0.70rem; color: var(--text-light); font-weight: 600; margin-bottom: 2px; }
+    &__solar-val   { display: block; font-size: 1.05rem; font-weight: 700; color: var(--text-dark); }
+}
+
+// ─────────────────────────────────────────────────────────────
+// TARJETA DE TRAYECTO EN COCHE
+// ─────────────────────────────────────────────────────────────
+.ccs-driving {
+
+    &__header {
+        padding: 16px 24px;
+        font-weight: 700;
+        font-size: 1rem;
+        background: rgba(59,139,250,.07);
+        color: var(--brand-blue);
+        border-bottom: 1px solid #e8f0fe;
+    }
+
+    &__body {
+        padding: 24px;
+    }
+
+    &__origin {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        flex-wrap: wrap;
+        margin-bottom: 20px;
+    }
+
+    &__origin-label {
+        font-size: 0.78rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: var(--text-light);
+    }
+
+    &__origin-val {
+        font-size: 0.95rem;
+        font-weight: 600;
+        color: var(--text-dark);
+        flex: 1;
+        min-width: 120px;
+    }
+
+    &__btn {
+        padding: 7px 14px;
+        background: var(--brand-blue);
+        color: #fff;
+        border: none;
+        border-radius: 20px;
+        font-size: 0.82rem;
+        font-weight: 600;
+        cursor: pointer;
+        font-family: inherit;
+        transition: opacity 0.2s;
+
+        &:hover { opacity: 0.85; }
+    }
+
+    &__stats {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        padding: 0 0 16px;
+        border-bottom: 1px solid #f5f5f5;
+        margin-bottom: 12px;
+
+        .ccs-results__stat-box { border-right: 1px solid #eee; }
+        .ccs-results__stat-box:last-child { border-right: none; }
+    }
+
+    &__status {
+        font-size: 0.82rem;
+        color: #999;
+        font-style: italic;
+        margin: 0;
+        min-height: 1.2em;
+    }
 }

@@ -1,0 +1,56 @@
+// ─────────────────────────────────────────────────────────────
+// BLOQUE DE PLANIFICACIÓN
+// ─────────────────────────────────────────────────────────────
+.ccs-planning {
+    margin-bottom: 30px;
+    padding: 22px 26px;
+    background: #f8faff;
+    border-radius: var(--radius-sm);
+    border: 1px solid #e4ecff;
+
+    &__title {
+        font-size: 0.82rem;
+        font-weight: 700;
+        color: var(--brand-blue);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin: 0 0 16px;
+    }
+
+    &__row {
+        display: grid;
+        grid-template-columns: 1fr 2fr;
+        gap: 20px;
+
+        @media (max-width: 600px) { grid-template-columns: 1fr; }
+    }
+}
+
+// Input compacto para la fila de planificación
+.ccs-input-group--inline {
+    .ccs-input-group__label { font-size: 0.82rem; }
+
+    input[type="date"],
+    input[type="text"],
+    input[type="number"] {
+        width: 100%;
+        padding: 8px 10px;
+        border: 1px solid #dde4f0;
+        border-radius: 6px;
+        font-size: 0.95rem;
+        font-family: inherit;
+        color: var(--text-dark);
+        background: #fff;
+        box-sizing: border-box;
+
+        &:focus { outline: none; border-color: var(--brand-blue); }
+    }
+}
+
+// Hint de label (texto secundario)
+.ccs-input-group__hint {
+    font-weight: 400;
+    font-size: 0.78rem;
+    color: #999;
+    margin-left: 4px;
+}

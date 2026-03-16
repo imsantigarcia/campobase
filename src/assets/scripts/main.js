@@ -1,75 +1,162 @@
-import { calculateRouteStats }    from './modules/calc.js';
-import { formatTime }              from './modules/utils.js';
-import { parseGPX }                from './modules/gpx.js';
-import { renderElevationProfile }  from './modules/charts.js';
-import { getSafetyInfo }           from './modules/safety.js';
+import { calculateRouteStats }            from './modules/calc.js';
+import { formatTime }                      from './modules/utils.js';
+import { parseGPX }                        from './modules/gpx.js';
+import { renderElevationProfile }          from './modules/charts.js';
+import { getSafetyInfo }                   from './modules/safety.js';
+import { searchMunicipality, reverseGeocode } from './modules/geocoding.js';
+import { getDrivingRoute }                 from './modules/driving.js';
 
-// ─── INICIALIZACIÓN ──────────────────────────────────────────────────────────
+// ─── ESTADO ───────────────────────────────────────────────────────────────────
+let userOriginLat   = null;   // coords del usuario (para el coche)
+let userOriginLng   = null;
+let userOriginLabel = '';
+let routeStartLat   = null;   // coords del municipio elegido (inicio ruta)
+let routeStartLng   = null;
+let autocompleteTimer = null;
+
+// ─── INIT ─────────────────────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
     initSyncInputs();
     initEventListeners();
+    initAutocomplete();
     setDefaultDate();
     requestGeolocation();
     updateCalculation();
 });
 
-// ─── FECHA POR DEFECTO ───────────────────────────────────────────────────────
 function setDefaultDate() {
     const el = document.getElementById('ccsDate');
-    if (!el) return;
-    const today = new Date();
-    el.value = today.toISOString().split('T')[0];
+    if (el) el.value = new Date().toISOString().split('T')[0];
 }
 
-// ─── GEOLOCALIZACIÓN ─────────────────────────────────────────────────────────
 function requestGeolocation() {
     if (!navigator.geolocation) return;
-    navigator.geolocation.getCurrentPosition(
-        pos => {
-            const lat = document.getElementById('ccsLat');
-            const lng = document.getElementById('ccsLng');
-            if (lat) lat.value = pos.coords.latitude.toFixed(4);
-            if (lng) lng.value = pos.coords.longitude.toFixed(4);
-            updateCalculation();
-        },
-        () => {} // Si deniegan, se usan los valores por defecto del HTML
-    );
+    navigator.geolocation.getCurrentPosition(async pos => {
+        userOriginLat = pos.coords.latitude;
+        userOriginLng = pos.coords.longitude;
+        try {
+            const name = await reverseGeocode(userOriginLat, userOriginLng);
+            userOriginLabel = name;
+            const input = document.getElementById('ccsMunicipality');
+            if (input && !input.value && name) {
+                input.value   = name;
+                routeStartLat = userOriginLat;
+                routeStartLng = userOriginLng;
+                updateCalculation();
+            }
+        } catch (_) {}
+    }, () => {});
 }
 
-// ─── EVENTOS ─────────────────────────────────────────────────────────────────
+// ─── EVENTOS ──────────────────────────────────────────────────────────────────
 function initEventListeners() {
-    ['ccsTerrain', 'ccsFlatSpeed', 'ccsVerticalProfile', 'ccsSex', 'ccsDate'].forEach(id => {
-        const el = document.getElementById(id);
-        if (el) el.addEventListener('change', updateCalculation);
-    });
+    ['ccsTerrain', 'ccsFlatSpeed', 'ccsVerticalProfile', 'ccsSex', 'ccsDate']
+        .forEach(id => document.getElementById(id)?.addEventListener('change', updateCalculation));
 
-    ['ccsAge', 'ccsLat', 'ccsLng'].forEach(id => {
-        const el = document.getElementById(id);
-        if (el) el.addEventListener('input', updateCalculation);
-    });
+    document.getElementById('ccsAge')
+        ?.addEventListener('input', updateCalculation);
 
-    const gpxInput = document.getElementById('ccsGpxInput');
-    if (gpxInput) gpxInput.addEventListener('change', handleGPXUpload);
+    document.getElementById('ccsGpxInput')
+        ?.addEventListener('change', handleGPXUpload);
+
+    document.getElementById('ccsSetOrigin')
+        ?.addEventListener('click', handleSetOrigin);
+}
+
+function handleSetOrigin() {
+    if (userOriginLat === null) {
+        alert('Activa la geolocalización para usar tu ubicación actual.');
+        return;
+    }
+    const label = document.getElementById('ccsOriginLabel');
+    if (label) label.innerText = userOriginLabel
+        || `${userOriginLat.toFixed(3)}, ${userOriginLng.toFixed(3)}`;
+    updateDriving();
 }
 
 function initSyncInputs() {
-    const pairs = [
+    [
         ['ccsDistRange',    'ccsDistance'],
         ['ccsElevRange',    'ccsElevation'],
         ['ccsElevNegRange', 'ccsElevationNegative'],
         ['ccsWeightRange',  'ccsWeight'],
-    ];
-
-    pairs.forEach(([rangeId, numId]) => {
-        const r = document.getElementById(rangeId);
-        const n = document.getElementById(numId);
+    ].forEach(([rid, nid]) => {
+        const r = document.getElementById(rid);
+        const n = document.getElementById(nid);
         if (!r || !n) return;
         r.addEventListener('input', () => { n.value = r.value; updateCalculation(); });
         n.addEventListener('input', () => { r.value = n.value; updateCalculation(); });
     });
 }
 
-// ─── ORQUESTADOR ─────────────────────────────────────────────────────────────
+// ─── AUTOCOMPLETADO ───────────────────────────────────────────────────────────
+function initAutocomplete() {
+    const input = document.getElementById('ccsMunicipality');
+    const list  = document.getElementById('ccsMunicipalityList');
+    if (!input || !list) return;
+
+    input.addEventListener('input', () => {
+        clearTimeout(autocompleteTimer);
+        const q = input.value.trim();
+        if (q.length < 2) { hideList(list); return; }
+        autocompleteTimer = setTimeout(async () => {
+            try { renderList(list, await searchMunicipality(q), input); }
+            catch (_) { hideList(list); }
+        }, 300);
+    });
+
+    document.addEventListener('click', e => {
+        if (!input.contains(e.target) && !list.contains(e.target)) hideList(list);
+    });
+
+    input.addEventListener('keydown', e => {
+        const items  = [...list.querySelectorAll('.ccs-autocomplete__item')];
+        const active = list.querySelector('.ccs-autocomplete__item--active');
+        if (e.key === 'Escape') { hideList(list); return; }
+        if (!items.length) return;
+        if (e.key === 'ArrowDown') {
+            e.preventDefault();
+            const idx  = active ? items.indexOf(active) + 1 : 0;
+            active?.classList.remove('ccs-autocomplete__item--active');
+            items[Math.min(idx, items.length - 1)]?.classList.add('ccs-autocomplete__item--active');
+        }
+        if (e.key === 'ArrowUp') {
+            e.preventDefault();
+            const idx  = active ? items.indexOf(active) - 1 : items.length - 1;
+            active?.classList.remove('ccs-autocomplete__item--active');
+            items[Math.max(idx, 0)]?.classList.add('ccs-autocomplete__item--active');
+        }
+        if (e.key === 'Enter' && active) { e.preventDefault(); active.click(); }
+    });
+}
+
+function renderList(list, results, input) {
+    list.innerHTML = '';
+    if (!results.length) { hideList(list); return; }
+    results.forEach(r => {
+        const li = document.createElement('li');
+        li.className   = 'ccs-autocomplete__item';
+        li.textContent = r.label;
+        li.addEventListener('mousedown', e => e.preventDefault()); // evita blur antes del click
+        li.addEventListener('click', () => {
+            input.value   = r.label;
+            routeStartLat = r.lat;
+            routeStartLng = r.lng;
+            hideList(list);
+            updateCalculation();
+            updateDriving();
+        });
+        list.appendChild(li);
+    });
+    list.classList.add('ccs-autocomplete__list--visible');
+}
+
+function hideList(list) {
+    list.innerHTML = '';
+    list.classList.remove('ccs-autocomplete__list--visible');
+}
+
+// ─── ORQUESTADOR ──────────────────────────────────────────────────────────────
 function updateCalculation() {
     const data = getDOMValues();
     if (data.D === 0 || data.W === 0) return;
@@ -82,18 +169,33 @@ function updateCalculation() {
 
     renderResults(data, results);
 
-    if (data.date && data.lat !== null && data.lng !== null) {
-        const safety = getSafetyInfo(data.date, data.lat, data.lng, results.tTotal);
-        renderSafetyCard(safety);
+    if (data.date && routeStartLat !== null) {
+        renderSafetyCard(getSafetyInfo(data.date, routeStartLat, routeStartLng, results.tTotal));
     }
 }
 
-// ─── LECTURA DOM ─────────────────────────────────────────────────────────────
+// ─── TRAYECTO EN COCHE ────────────────────────────────────────────────────────
+async function updateDriving() {
+    if (userOriginLat === null || routeStartLat === null) return;
+    const card = document.getElementById('ccsDrivingCard');
+    if (!card) return;
+
+    card.querySelector('#drivingStatus').innerText = 'Calculando ruta...';
+    card.classList.add('ccs-results--visible');
+
+    try {
+        const route = await getDrivingRoute(userOriginLat, userOriginLng, routeStartLat, routeStartLng);
+        card.querySelector('#drivingDistVal').innerText = `${route.distanceKm} km`;
+        card.querySelector('#drivingTimeVal').innerText = route.durationFmt;
+        card.querySelector('#drivingStatus').innerText  = '';
+    } catch (err) {
+        card.querySelector('#drivingStatus').innerText = `⚠ ${err.message}`;
+    }
+}
+
+// ─── LECTURA DOM ──────────────────────────────────────────────────────────────
 function getDOMValues() {
     const dateStr = document.getElementById('ccsDate')?.value;
-    const latVal  = parseFloat(document.getElementById('ccsLat')?.value);
-    const lngVal  = parseFloat(document.getElementById('ccsLng')?.value);
-
     return {
         D:               parseFloat(document.getElementById('ccsDistance').value)          || 0,
         Eplus:           parseFloat(document.getElementById('ccsElevation').value)         || 0,
@@ -105,12 +207,9 @@ function getDOMValues() {
         Sex:             document.getElementById('ccsSex')?.value   || null,
         Age:             parseFloat(document.getElementById('ccsAge')?.value) || 0,
         date:            dateStr ? new Date(dateStr + 'T12:00:00') : null,
-        lat:             isNaN(latVal) ? null : latVal,
-        lng:             isNaN(lngVal) ? null : lngVal,
     };
 }
 
-// ─── RENDER RESULTADOS ────────────────────────────────────────────────────────
 function updateInputPair(rangeId, numId, val) {
     const range = document.getElementById(rangeId);
     const num   = document.getElementById(numId);
@@ -119,6 +218,7 @@ function updateInputPair(rangeId, numId, val) {
     num.value   = val;
 }
 
+// ─── RENDER ───────────────────────────────────────────────────────────────────
 function renderResults(inputs, stats) {
     const header = document.getElementById('resHeader');
     header.innerText = `Dificultad física: ${stats.diffLabel}`;
@@ -133,8 +233,8 @@ function renderResults(inputs, stats) {
         : '';
 
     document.getElementById('resNarrativeText').innerHTML = `
-        Esta ruta de <strong>${inputs.D} km</strong> y <strong>${inputs.Eplus} m</strong> de desnivel
-        positivo es de dificultad física <strong>${stats.diffLabel.toLowerCase()}</strong>.
+        Esta ruta de <strong>${inputs.D} km</strong> y <strong>${inputs.Eplus} m</strong>
+        de desnivel positivo es de dificultad física <strong>${stats.diffLabel.toLowerCase()}</strong>.
         Te llevará aproximadamente <strong>${formatTime(stats.tEffective)}</strong> en movimiento,
         o <strong>${formatTime(stats.tTotal)}</strong> contando paradas.
         Gasto calórico estimado: <strong>${stats.calMin}–${stats.calMax} kcal</strong>
@@ -143,23 +243,19 @@ function renderResults(inputs, stats) {
     document.getElementById('ccsResultCard').classList.add('ccs-results--visible');
 }
 
-// ─── RENDER TARJETA DE SEGURIDAD ─────────────────────────────────────────────
 function renderSafetyCard(s) {
     const card = document.getElementById('ccsSafetyCard');
     if (!card) return;
 
     const levelClass = {
-        ok:         'ccs-safety__header--ok',
-        warn:       'ccs-safety__header--warn',
-        danger:     'ccs-safety__header--danger',
-        impossible: 'ccs-safety__header--danger',
+        ok: 'ccs-safety__header--ok', warn: 'ccs-safety__header--warn',
+        danger: 'ccs-safety__header--danger', impossible: 'ccs-safety__header--danger',
     }[s.level];
-
     const icon = { ok: '✅', warn: '⚠️', danger: '🚫', impossible: '🚫' }[s.level];
 
-    const header = card.querySelector('.ccs-safety__header');
-    header.className = `ccs-safety__header ${levelClass}`;
-    header.innerHTML = `<span class="ccs-safety__icon">${icon}</span><span>${s.levelLabel}</span>`;
+    const hdr = card.querySelector('.ccs-safety__header');
+    hdr.className = `ccs-safety__header ${levelClass}`;
+    hdr.innerHTML = `<span class="ccs-safety__icon">${icon}</span><span>${s.levelLabel}</span>`;
 
     card.querySelector('#safetyLatestStart').innerText = s.fmtLatest;
     card.querySelector('#safetySunrise').innerText     = s.fmtSunrise;
@@ -170,117 +266,84 @@ function renderSafetyCard(s) {
     card.classList.add('ccs-results--visible');
 }
 
+// ─── CANVAS (con corrección DPR) ──────────────────────────────────────────────
 function renderSafetyTimeline(canvas, s) {
     if (!canvas || !s.sunrise || !s.civilDusk) return;
 
-    const W = canvas.offsetWidth || 680;
-    const H = 68;
-    canvas.width  = W;
-    canvas.height = H;
+    const dpr = window.devicePixelRatio || 1;
+    const W   = canvas.offsetWidth || 680;
+    const H   = 68;
+
+    canvas.width        = W * dpr;
+    canvas.height       = H * dpr;
+    canvas.style.width  = W + 'px';
+    canvas.style.height = H + 'px';
+
     const ctx = canvas.getContext('2d');
+    ctx.scale(dpr, dpr);
     ctx.clearRect(0, 0, W, H);
 
-    // Ventana de referencia: 05:00–23:00
-    const REF_START = 5 * 60;
-    const REF_SPAN  = 18 * 60;
+    const REF_START = 5 * 60, REF_SPAN = 18 * 60;
 
     function toX(date) {
         const local = new Date(date.toLocaleString('en-US', { timeZone: 'Europe/Madrid' }));
-        const mins  = local.getHours() * 60 + local.getMinutes();
-        return Math.max(0, Math.min(W, ((mins - REF_START) / REF_SPAN) * W));
+        return Math.max(0, Math.min(W, ((local.getHours() * 60 + local.getMinutes() - REF_START) / REF_SPAN) * W));
     }
 
-    const xSunrise = toX(s.sunrise);
-    const xSunset  = toX(s.sunset);
+    const xSunrise = toX(s.sunrise), xSunset = toX(s.sunset);
     const xDusk    = toX(s.civilDusk);
     const xLatest  = s.latestStart ? toX(s.latestStart) : null;
-
     const Y = 22, BAR = 24, R = 6;
 
-    // Noche
-    ctx.fillStyle = '#1e1b4b';
-    roundRect(ctx, 0, Y, W, BAR, R); ctx.fill();
-
-    // Crepúsculo (amanecer → atardecer + margen civil)
-    ctx.fillStyle = '#f97316';
-    roundRect(ctx, xSunrise, Y, xDusk - xSunrise, BAR, 0); ctx.fill();
-
-    // Día (amanecer → atardecer)
-    ctx.fillStyle = '#fde68a';
-    roundRect(ctx, xSunrise, Y, xSunset - xSunrise, BAR, 0); ctx.fill();
-
-    // Zona segura de inicio
-    if (xLatest !== null && xLatest > xSunrise) {
-        ctx.fillStyle = {
-            ok:         'rgba(34,197,94,0.4)',
-            warn:       'rgba(251,191,36,0.5)',
-            danger:     'rgba(239,68,68,0.5)',
-            impossible: 'rgba(239,68,68,0.5)',
-        }[s.level];
-        roundRect(ctx, xSunrise, Y, xLatest - xSunrise, BAR, 0); ctx.fill();
-    }
-
-    // Marcador hora máxima
-    if (xLatest !== null) {
-        const col = { ok: '#16a34a', warn: '#d97706', danger: '#dc2626', impossible: '#dc2626' }[s.level];
-        ctx.strokeStyle = col;
-        ctx.lineWidth   = 3;
+    const rr = (x, y, w, h, r) => {
+        if (w <= 0) return;
         ctx.beginPath();
-        ctx.moveTo(xLatest, Y - 5);
-        ctx.lineTo(xLatest, Y + BAR + 5);
-        ctx.stroke();
+        ctx.moveTo(x + r, y);
+        ctx.arcTo(x+w, y, x+w, y+h, r); ctx.arcTo(x+w, y+h, x, y+h, r);
+        ctx.arcTo(x, y+h, x, y, r);     ctx.arcTo(x, y, x+w, y, r);
+        ctx.closePath();
+    };
 
-        // Etiqueta hora máxima (arriba)
-        ctx.fillStyle = col;
-        ctx.font      = 'bold 11px Montserrat, sans-serif';
-        ctx.textAlign = 'center';
-        ctx.fillText(`⬆ ${s.fmtLatest}`, clamp(xLatest, 32, W - 32), Y - 8);
+    ctx.fillStyle = '#1e1b4b'; rr(0, Y, W, BAR, R); ctx.fill();
+    ctx.fillStyle = '#f97316'; rr(xSunrise, Y, xDusk - xSunrise, BAR, 0); ctx.fill();
+    ctx.fillStyle = '#fde68a'; rr(xSunrise, Y, xSunset - xSunrise, BAR, 0); ctx.fill();
+
+    if (xLatest !== null && xLatest > xSunrise) {
+        ctx.fillStyle = { ok:'rgba(34,197,94,.4)', warn:'rgba(251,191,36,.5)', danger:'rgba(239,68,68,.5)', impossible:'rgba(239,68,68,.5)' }[s.level];
+        rr(xSunrise, Y, xLatest - xSunrise, BAR, 0); ctx.fill();
     }
 
-    // Etiquetas inferiores: amanecer, atardecer, crepúsculo
-    ctx.font      = '10px Montserrat, sans-serif';
-    ctx.textAlign = 'center';
-    [
-        [xSunrise, `🌅 ${s.fmtSunrise}`],
-        [xSunset,  `🌇 ${s.fmtSunset}`],
-        [xDusk,    `🌑 ${s.fmtDusk}`],
-    ].forEach(([x, label]) => {
-        ctx.fillStyle = '#555';
-        ctx.fillText(label, clamp(x, 28, W - 28), Y + BAR + 14);
-    });
+    if (xLatest !== null) {
+        const col = { ok:'#16a34a', warn:'#d97706', danger:'#dc2626', impossible:'#dc2626' }[s.level];
+        ctx.strokeStyle = col; ctx.lineWidth = 2.5;
+        ctx.beginPath(); ctx.moveTo(xLatest, Y-5); ctx.lineTo(xLatest, Y+BAR+5); ctx.stroke();
+        ctx.fillStyle = col; ctx.font = 'bold 11px Montserrat,sans-serif'; ctx.textAlign = 'center';
+        ctx.fillText(`⬆ ${s.fmtLatest}`, clamp(xLatest, 34, W-34), Y-8);
+    }
+
+    ctx.font = '10px Montserrat,sans-serif'; ctx.textAlign = 'center';
+    [[xSunrise,`🌅 ${s.fmtSunrise}`],[xSunset,`🌇 ${s.fmtSunset}`],[xDusk,`🌑 ${s.fmtDusk}`]]
+        .forEach(([x,l]) => { ctx.fillStyle='#555'; ctx.fillText(l, clamp(x,28,W-28), Y+BAR+14); });
 }
 
-function roundRect(ctx, x, y, w, h, r) {
-    if (w <= 0) return;
-    ctx.beginPath();
-    ctx.moveTo(x + r, y);
-    ctx.arcTo(x + w, y,     x + w, y + h, r);
-    ctx.arcTo(x + w, y + h, x,     y + h, r);
-    ctx.arcTo(x,     y + h, x,     y,     r);
-    ctx.arcTo(x,     y,     x + w, y,     r);
-    ctx.closePath();
-}
+function clamp(v, a, b) { return Math.max(a, Math.min(b, v)); }
 
-function clamp(v, min, max) { return Math.max(min, Math.min(max, v)); }
-
-// ─── GPX ─────────────────────────────────────────────────────────────────────
+// ─── GPX ──────────────────────────────────────────────────────────────────────
 function handleGPXUpload(e) {
     const file = e.target.files[0];
     if (!file) return;
-
     document.getElementById('ccsGpxText').innerText = 'Analizando ruta...';
-
     const reader = new FileReader();
-    reader.onload = function(evt) {
+    reader.onload = evt => {
         try {
-            const gpxData = parseGPX(evt.target.result);
-            updateInputPair('ccsDistRange',    'ccsDistance',          gpxData.distance);
-            updateInputPair('ccsElevRange',    'ccsElevation',         gpxData.elevationGain);
-            updateInputPair('ccsElevNegRange', 'ccsElevationNegative', gpxData.elevationLoss);
+            const g = parseGPX(evt.target.result);
+            updateInputPair('ccsDistRange',    'ccsDistance',          g.distance);
+            updateInputPair('ccsElevRange',    'ccsElevation',         g.elevationGain);
+            updateInputPair('ccsElevNegRange', 'ccsElevationNegative', g.elevationLoss);
             document.getElementById('ccsGpxText').innerText =
-                `Cargado: ${gpxData.distance} km | +${gpxData.elevationGain} m | -${gpxData.elevationLoss} m`;
+                `Cargado: ${g.distance} km | +${g.elevationGain} m | -${g.elevationLoss} m`;
             document.getElementById('ccsProfileCard').classList.add('ccs-profile-card--visible');
-            renderElevationProfile('elevationChart', gpxData.trackData);
+            renderElevationProfile('elevationChart', g.trackData);
             updateCalculation();
         } catch (err) {
             document.getElementById('ccsGpxText').innerText = `⚠ Error: ${err.message}`;
